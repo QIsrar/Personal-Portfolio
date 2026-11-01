@@ -1061,30 +1061,39 @@ section {
 .skill-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.55rem;
 }
 
 .skill-chip {
     padding: 0.45rem 0.9rem;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(0, 212, 255, 0.18);
+    border-radius: 8px;
     font-size: 0.88rem;
-    color: var(--text-primary);
+    font-weight: 500;
+    color: #e2e8f0;
     transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
 }
 
 .skill-chip:hover {
-    background: rgba(0, 212, 255, 0.15);
+    background: rgba(0, 212, 255, 0.12);
     border-color: var(--neon-blue);
+    color: #ffffff;
     transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.25);
 }
 
-.skill-chip.highlight-chip {
-    background: rgba(0, 212, 255, 0.1);
-    border-color: rgba(0, 212, 255, 0.3);
-    color: var(--neon-blue);
-    font-weight: 600;
+.skill-category-card:nth-child(2) .skill-chip {
+    border-color: rgba(168, 85, 247, 0.22);
+}
+
+.skill-category-card:nth-child(2) .skill-chip:hover {
+    background: rgba(168, 85, 247, 0.15);
+    border-color: var(--neon-purple);
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25);
 }
 
 /* ===== Projects Section ===== */
@@ -1481,7 +1490,7 @@ section {
 
 .certs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
 }
 
@@ -1494,6 +1503,7 @@ section {
     gap: 1.5rem;
     align-items: flex-start;
     transition: var(--transition);
+    height: 100%;
 }
 
 .cert-card:hover {
@@ -1540,7 +1550,9 @@ section {
 .cert-info {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     flex-grow: 1;
+    height: 100%;
 }
 
 .cert-date {
@@ -2092,7 +2104,8 @@ section {
         font-size: 2.4rem;
     }
     
-    .projects-grid {
+    .projects-grid,
+    .certs-grid {
         grid-template-columns: 1fr;
     }
     
