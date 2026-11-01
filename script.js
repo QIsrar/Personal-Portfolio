@@ -4,7 +4,7 @@ window.addEventListener('load', () => {
     if (preloader) {
         setTimeout(() => {
             preloader.classList.add('hidden');
-        }, 1200);
+        }, 1100);
     }
 });
 
@@ -13,18 +13,188 @@ const typingName = document.getElementById('typingName');
 const nameText = 'Qazi Israr Ahmad';
 let charIndex = 0;
 
-function typeCharacter() {
+function typeHeroName() {
     if (typingName && charIndex < nameText.length) {
         typingName.textContent += nameText.charAt(charIndex);
         charIndex++;
-        setTimeout(typeCharacter, 80);
+        setTimeout(typeHeroName, 75);
     }
 }
 
-// Start typing after preloader
+// Start typing hero name after preloader
 setTimeout(() => {
-    typeCharacter();
-}, 1400);
+    typeHeroName();
+}, 1300);
+
+// ===== Runtime Code Snippet Typing Animation =====
+// Matches the exact code structure in screenshot:
+// interface DigitalSpecialist {
+//   name: 'Qazi Israr Ahmad';
+//   education: 'BS CS @ COMSATS (CGPA 3.33)';
+//   primaryPillars: ['Web Development', 'Digital Marketing & SEO'];
+//   techStack: ['Next.js', 'TypeScript', 'MERN', 'Supabase', 'Tailwind'];
+//   marketing: ['Technical SEO', 'Google Ads', 'Meta Ads', 'CRO'];
+//   certifications: ['Agentic AI', 'Threat 2 Thought', 'Robotics World'];
+//   deliverable: () => 'Code that scales + Campaigns that convert';
+// }
+
+const codeTokens = [
+    { text: 'interface ', type: 'keyword' },
+    { text: 'DigitalSpecialist ', type: 'type' },
+    { text: '{\n', type: 'plain' },
+    { text: '  name', type: 'property' },
+    { text: ': ', type: 'plain' },
+    { text: "'Qazi Israr Ahmad'", type: 'string' },
+    { text: ';\n', type: 'plain' },
+    { text: '  education', type: 'property' },
+    { text: ': ', type: 'plain' },
+    { text: "'BS CS @ COMSATS (CGPA 3.33)'", type: 'string' },
+    { text: ';\n', type: 'plain' },
+    { text: '  primaryPillars', type: 'property' },
+    { text: ': [', type: 'plain' },
+    { text: "'Web Development'", type: 'string' },
+    { text: ', ', type: 'plain' },
+    { text: "'Digital Marketing & SEO'", type: 'string' },
+    { text: '];\n', type: 'plain' },
+    { text: '  techStack', type: 'property' },
+    { text: ': [', type: 'plain' },
+    { text: "'Next.js'", type: 'string' },
+    { text: ', ', type: 'plain' },
+    { text: "'TypeScript'", type: 'string' },
+    { text: ', ', type: 'plain' },
+    { text: "'MERN'", type: 'string' },
+    { text: ', ', type: 'plain' },
+    { text: "'Supabase'", type: 'string' },
+    { text: ', ', type: 'plain' },
+    { text: "'Tailwind'", type: 'string' },
+    { text: '];\n', type: 'plain' },
+    { text: '  marketing', type: 'property' },
+    { text: ': [', type: 'plain' },
+    { text: "'Technical SEO'", type: 'string' },
+    { text: ', ', type: 'plain' },
+    { text: "'Google Ads'", type: 'string' },
+    { text: ', ', type: 'plain' },
+    { text: "'Meta Ads'", type: 'string' },
+    { text: ', ', type: 'plain' },
+    { text: "'CRO'", type: 'string' },
+    { text: '];\n', type: 'plain' },
+    { text: '  certifications', type: 'property' },
+    { text: ': [', type: 'plain' },
+    { text: "'Agentic AI'", type: 'string' },
+    { text: ', ', type: 'plain' },
+    { text: "'Threat 2 Thought'", type: 'string' },
+    { text: ', ', type: 'plain' },
+    { text: "'Robotics World'", type: 'string' },
+    { text: '];\n', type: 'plain' },
+    { text: '  deliverable', type: 'property' },
+    { text: ': () => ', type: 'plain' },
+    { text: "'Code that scales + Campaigns that convert'", type: 'string' },
+    { text: ';\n', type: 'plain' },
+    { text: '}', type: 'plain' }
+];
+
+function typeRuntimeCodeSnippet() {
+    const codeContainer = document.getElementById('runtimeCodeSnippet');
+    if (!codeContainer) return;
+
+    let currentTokenIndex = 0;
+    let currentCharIndex = 0;
+    let currentSpan = null;
+
+    function renderNextChar() {
+        if (currentTokenIndex >= codeTokens.length) {
+            // Typing complete, keep cursor blinking
+            return;
+        }
+
+        const token = codeTokens[currentTokenIndex];
+
+        if (currentCharIndex === 0) {
+            currentSpan = document.createElement('span');
+            if (token.type === 'keyword') currentSpan.className = 'code-keyword';
+            else if (token.type === 'type') currentSpan.className = 'code-type';
+            else if (token.type === 'property') currentSpan.className = 'code-property';
+            else if (token.type === 'string') currentSpan.className = 'code-string';
+            else if (token.type === 'plain') currentSpan.className = 'code-bracket';
+            codeContainer.appendChild(currentSpan);
+        }
+
+        const char = token.text.charAt(currentCharIndex);
+        currentSpan.textContent += char;
+        currentCharIndex++;
+
+        let delay = 18;
+        if (char === '\n') delay = 90;
+        else if (char === ';') delay = 60;
+        else if (char === ',') delay = 40;
+
+        if (currentCharIndex >= token.text.length) {
+            currentTokenIndex++;
+            currentCharIndex = 0;
+        }
+
+        setTimeout(renderNextChar, delay);
+    }
+
+    // Begin code snippet typing shortly after hero name typing starts
+    setTimeout(renderNextChar, 2400);
+}
+
+typeRuntimeCodeSnippet();
+
+// ===== Dynamic Stats Counter Animation on Scroll =====
+let statsAnimated = false;
+
+function animateStatNumbers() {
+    const statCards = document.querySelectorAll('.stat-number');
+    statCards.forEach(card => {
+        const target = parseFloat(card.getAttribute('data-target'));
+        const suffix = card.getAttribute('data-suffix') || '';
+        const decimals = parseInt(card.getAttribute('data-decimals') || '0', 10);
+        const duration = 1800; // ms
+        const startTime = performance.now();
+
+        function updateCounter(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease-out cubic
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            const currentVal = easeProgress * target;
+
+            if (decimals > 0) {
+                card.textContent = currentVal.toFixed(decimals) + suffix;
+            } else {
+                card.textContent = Math.floor(currentVal) + suffix;
+            }
+
+            if (progress < 1) {
+                requestAnimationFrame(updateCounter);
+            } else {
+                if (decimals > 0) {
+                    card.textContent = target.toFixed(decimals) + suffix;
+                } else {
+                    card.textContent = target + suffix;
+                }
+            }
+        }
+
+        requestAnimationFrame(updateCounter);
+    });
+}
+
+const statsSection = document.getElementById('statsSection');
+if (statsSection) {
+    const statsObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !statsAnimated) {
+                statsAnimated = true;
+                animateStatNumbers();
+            }
+        });
+    }, { threshold: 0.25 });
+
+    statsObserver.observe(statsSection);
+}
 
 // ===== Navigation Scroll & Active Spy =====
 const navbar = document.getElementById('navbar');
@@ -115,7 +285,6 @@ const projectCards = document.querySelectorAll('.project-card');
 if (filterButtons.length > 0 && projectCards.length > 0) {
     filterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Remove active from all
             filterButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
@@ -142,7 +311,7 @@ if (filterButtons.length > 0 && projectCards.length > 0) {
     });
 }
 
-// ===== Contact Form Handling =====
+// ===== Contact Form Handling (Netlify Forms & Mailto Fallback) =====
 const contactForm = document.getElementById('contactForm');
 const formStatus = document.getElementById('formStatus');
 
@@ -159,37 +328,38 @@ if (contactForm && formStatus) {
         const submitBtn = contactForm.querySelector('.btn-submit');
         const originalText = submitBtn.innerHTML;
 
-        submitBtn.innerHTML = '<span>Processing...</span><i class="fas fa-spinner fa-spin"></i>';
+        submitBtn.innerHTML = '<span>Sending...</span><i class="fas fa-spinner fa-spin"></i>';
         submitBtn.disabled = true;
 
-        setTimeout(() => {
-            formStatus.className = 'form-status success';
-            formStatus.innerHTML = `✓ Thank you <strong>${name}</strong>! Your inquiry regarding <em>${service}</em> has been prepared. I will respond to <strong>${email}</strong> promptly. You can also reach me instantly on WhatsApp!`;
-            
-            // Build mailto fallback link
-            const mailtoUri = `mailto:qisrar951@gmail.com?subject=${encodeURIComponent(`[${service}] ${subject}`)}&body=${encodeURIComponent(`From: ${name} (${email})\n\n${message}`)}`;
-            
-            // Provide option to open email client directly
-            const openMailBtn = document.createElement('a');
-            openMailBtn.href = mailtoUri;
-            openMailBtn.className = 'btn btn-secondary';
-            openMailBtn.style.marginTop = '10px';
-            openMailBtn.style.display = 'inline-block';
-            openMailBtn.innerHTML = '<i class="fas fa-envelope-open-text"></i> Open in Your Email App';
-            
-            formStatus.appendChild(document.createElement('br'));
-            formStatus.appendChild(openMailBtn);
+        const formData = new FormData(contactForm);
 
+        // Submit via fetch for Netlify Forms
+        fetch('/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(formData).toString()
+        })
+        .then(() => {
+            formStatus.className = 'form-status success';
+            formStatus.innerHTML = `✓ Thank you <strong>${name}</strong>! Your message regarding <em>${service}</em> has been submitted. I will respond to <strong>${email}</strong> shortly.`;
             contactForm.reset();
+        })
+        .catch(() => {
+            // Fallback response if not running on Netlify environment yet
+            formStatus.className = 'form-status success';
+            const mailtoUri = `mailto:qisrar951@gmail.com?subject=${encodeURIComponent(`[${service}] ${subject}`)}&body=${encodeURIComponent(`From: ${name} (${email})\n\n${message}`)}`;
+            formStatus.innerHTML = `✓ Thank you <strong>${name}</strong>! If submitting locally, you can also send directly via: <a href="${mailtoUri}" class="fallback-mail-link">Open in Email Client</a>.`;
+        })
+        .finally(() => {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
-        }, 1000);
+        });
     });
 }
 
 // ===== Scroll Reveal Animations =====
 const observerOptions = {
-    threshold: 0.12,
+    threshold: 0.1,
     rootMargin: '0px 0px -40px 0px'
 };
 
@@ -215,18 +385,14 @@ elementsToAnimate.forEach(element => {
 
 // ===== Console Welcome Note =====
 console.log(
-    '%c👋 Assalamualikum! Looking for Qazi Israr Ahmad?',
+    '%c👋 Assalamualikum! Qazi Israr Ahmad Portfolio',
     'font-size: 16px; color: #00d4ff; font-weight: bold;'
 );
 console.log(
-    '%c🚀 Full-Stack Web Developer & Digital Marketing Specialist',
+    '%c💼 Web Developer & Digital Marketing Specialist',
     'font-size: 13px; color: #a855f7; font-weight: 600;'
 );
 console.log(
     '%c📧 Email: qisrar951@gmail.com | 📱 WhatsApp: +92 300 5064077',
     'font-size: 12px; color: #10b981;'
-);
-console.log(
-    '%c🔗 Live Marketing Portfolio: https://appverse-technologies.com/qazi-israr-ahmad/',
-    'font-size: 12px; color: #f59e0b;'
 );
