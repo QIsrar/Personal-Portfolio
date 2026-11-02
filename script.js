@@ -1,12 +1,5 @@
-// ===== Preloader =====
-window.addEventListener('load', () => {
-    const preloader = document.getElementById('preloader');
-    if (preloader) {
-        setTimeout(() => {
-            preloader.classList.add('hidden');
-        }, 1100);
-    }
-});
+// ===== Motion preference =====
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ===== Typing Animation for Hero Title =====
 const typingName = document.getElementById('typingName');
@@ -21,10 +14,11 @@ function typeHeroName() {
     }
 }
 
-// Start typing hero name after preloader
-setTimeout(() => {
-    typeHeroName();
-}, 1300);
+// Type the hero name (the full name stays in the HTML for SEO, no-JS and reduced motion)
+if (typingName && !prefersReducedMotion) {
+    typingName.textContent = '';
+    setTimeout(typeHeroName, 200);
+}
 
 // ===== Runtime Code Snippet Typing Animation =====
 // Matches the exact code structure in screenshot:
@@ -133,11 +127,15 @@ function typeRuntimeCodeSnippet() {
             currentCharIndex = 0;
         }
 
-        setTimeout(renderNextChar, delay);
+        if (!prefersReducedMotion) setTimeout(renderNextChar, delay);
     }
 
     // Begin code snippet typing shortly after hero name typing starts
-    setTimeout(renderNextChar, 2400);
+    if (prefersReducedMotion) {
+        while (currentTokenIndex < codeTokens.length) renderNextChar();
+    } else {
+        setTimeout(renderNextChar, 1300);
+    }
 }
 
 typeRuntimeCodeSnippet();
@@ -200,6 +198,14 @@ if (statsSection) {
 const navbar = document.getElementById('navbar');
 const navLinks = document.querySelectorAll('.nav-link');
 
+// Keep the mobile menu positioned right under the navbar
+function setNavHeight() {
+    if (navbar) document.documentElement.style.setProperty('--nav-h', navbar.offsetHeight + 'px');
+}
+setNavHeight();
+window.addEventListener('resize', setNavHeight);
+window.addEventListener('load', setNavHeight);
+
 window.addEventListener('scroll', () => {
     if (navbar) {
         if (window.scrollY > 40) {
@@ -216,25 +222,33 @@ const hamburger = document.getElementById('hamburger');
 const navMenu = document.getElementById('navMenu');
 
 if (hamburger && navMenu) {
-    hamburger.addEventListener('click', () => {
-        navMenu.classList.toggle('active');
-        hamburger.classList.toggle('toggle');
-    });
+    const setMenu = (open) => {
+        navMenu.classList.toggle('active', open);
+        hamburger.classList.toggle('toggle', open);
+        hamburger.setAttribute('aria-expanded', String(open));
+        document.body.classList.toggle('menu-open', open);
+    };
+    const toggleMenu = () => setMenu(!navMenu.classList.contains('active'));
 
-    // Close menu when clicking on a link
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            navMenu.classList.remove('active');
-            hamburger.classList.remove('toggle');
-        });
-    });
-
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
-            navMenu.classList.remove('active');
-            hamburger.classList.remove('toggle');
+    hamburger.addEventListener('click', toggleMenu);
+    hamburger.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleMenu();
         }
+    });
+
+    // Close menu when clicking on any menu link
+    navMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => setMenu(false));
+    });
+
+    // Close menu when clicking outside or pressing Escape
+    document.addEventListener('click', (e) => {
+        if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) setMenu(false);
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setMenu(false);
     });
 }
 
@@ -292,7 +306,7 @@ if (filterButtons.length > 0 && projectCards.length > 0) {
 
             projectCards.forEach(card => {
                 const category = card.getAttribute('data-category') || '';
-                
+
                 if (filterValue === 'all' || category.includes(filterValue)) {
                     card.style.display = 'flex';
                     setTimeout(() => {
@@ -316,7 +330,7 @@ const contactForm = document.getElementById('contactForm');
 const formStatus = document.getElementById('formStatus');
 
 if (contactForm && formStatus) {
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const name = document.getElementById('name').value.trim();
@@ -328,32 +342,42 @@ if (contactForm && formStatus) {
         const submitBtn = contactForm.querySelector('.btn-submit');
         const originalText = submitBtn.innerHTML;
 
-        submitBtn.innerHTML = '<span>Sending...</span><i class="fas fa-spinner fa-spin"></i>';
+        formStatus.className = 'form-status';
+        formStatus.textContent = '';
+        submitBtn.innerHTML = '<span>Sending...</span><i class="fas fa-spinner fa-spin" aria-hidden="true"></i>';
         submitBtn.disabled = true;
 
-        const formData = new FormData(contactForm);
+        try {
+            // Submit via fetch for Netlify Forms (works once the site is deployed on Netlify)
+            const response = await fetch('/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams(new FormData(contactForm)).toString()
+            });
+            if (!response.ok) throw new Error('Form request failed: ' + response.status);
 
-        // Submit via fetch for Netlify Forms
-        fetch('/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams(formData).toString()
-        })
-        .then(() => {
             formStatus.className = 'form-status success';
-            formStatus.innerHTML = `✓ Thank you <strong>${name}</strong>! Your message regarding <em>${service}</em> has been submitted. I will respond to <strong>${email}</strong> shortly.`;
+            formStatus.textContent = `\u2713 Thank you, ${name}! Your message has been sent. I will reply to ${email} soon.`;
             contactForm.reset();
-        })
-        .catch(() => {
-            // Fallback response if not running on Netlify environment yet
-            formStatus.className = 'form-status success';
-            const mailtoUri = `mailto:qisrar951@gmail.com?subject=${encodeURIComponent(`[${service}] ${subject}`)}&body=${encodeURIComponent(`From: ${name} (${email})\n\n${message}`)}`;
-            formStatus.innerHTML = `✓ Thank you <strong>${name}</strong>! If submitting locally, you can also send directly via: <a href="${mailtoUri}" class="fallback-mail-link">Open in Email Client</a>.`;
-        })
-        .finally(() => {
+        } catch (err) {
+            formStatus.className = 'form-status error';
+            formStatus.textContent = 'Sorry, your message could not be sent. Please try again, or contact me directly: ';
+            const mail = document.createElement('a');
+            mail.className = 'fallback-mail-link';
+            mail.textContent = 'send an email';
+            mail.href = `mailto:qisrar951@gmail.com?subject=${encodeURIComponent(`[${service}] ${subject}`)}&body=${encodeURIComponent(`From: ${name} (${email})\n\n${message}`)}`;
+            const wa = document.createElement('a');
+            wa.className = 'fallback-mail-link';
+            wa.textContent = 'WhatsApp';
+            wa.href = 'https://wa.me/923005064077';
+            wa.target = '_blank';
+            wa.rel = 'noopener noreferrer';
+            formStatus.append(mail, document.createTextNode(' or '), wa, document.createTextNode('.'));
+        } finally {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
-        });
+            formStatus.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'nearest' });
+        }
     });
 }
 
@@ -376,7 +400,7 @@ const elementsToAnimate = document.querySelectorAll(
     '.project-card, .cert-card, .edu-card, .timeline-content, .contact-card, .stat-card, .skill-category-card'
 );
 
-elementsToAnimate.forEach(element => {
+if (!prefersReducedMotion) elementsToAnimate.forEach(element => {
     element.style.opacity = '0';
     element.style.transform = 'translateY(25px)';
     element.style.transition = 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
@@ -385,7 +409,7 @@ elementsToAnimate.forEach(element => {
 
 // ===== Console Welcome Note =====
 console.log(
-    '%c👋 Assalamualikum! Qazi Israr Ahmad Portfolio',
+    '%c👋 Assalamualaikum! Qazi Israr Ahmad Portfolio',
     'font-size: 16px; color: #00d4ff; font-weight: bold;'
 );
 console.log(
@@ -396,3 +420,6 @@ console.log(
     '%c📧 Email: qisrar951@gmail.com | 📱 WhatsApp: +92 300 5064077',
     'font-size: 12px; color: #10b981;'
 );
+
+// ===== Accessibility: hide decorative icons from screen readers =====
+document.querySelectorAll('i.fas, i.fab, i.far').forEach(icon => icon.setAttribute('aria-hidden', 'true'));
